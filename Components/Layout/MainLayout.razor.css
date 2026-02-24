@@ -1,0 +1,26 @@
+.layout {
+    display: flex;
+}
+
+/* MAIN */
+.main-content {
+    flex: 1;
+    background: #f3f4f6;
+    min-height: 100vh;
+}
+
+/* TOPBAR */
+.topbar {
+    height: 60px;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* CONTENT */
+.content {
+    padding: 30px;
+}

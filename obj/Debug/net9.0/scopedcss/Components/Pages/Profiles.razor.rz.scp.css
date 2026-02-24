@@ -1,0 +1,79 @@
+.profiles-container[b-g0c0o9jq7h] {
+    padding: 20px;
+}
+
+.profiles-header[b-g0c0o9jq7h] {
+    background: #f3e8e8;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+    .profiles-header h2[b-g0c0o9jq7h] {
+        font-weight: 700;
+    }
+
+/* CARD */
+.profile-card[b-g0c0o9jq7h] {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+}
+
+    .profile-card:hover[b-g0c0o9jq7h] {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .profile-card img[b-g0c0o9jq7h] {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+/* INFO */
+.profile-info[b-g0c0o9jq7h] {
+    padding: 15px;
+}
+
+    .profile-info h5[b-g0c0o9jq7h] {
+        font-weight: 600;
+    }
+
+/* LIKE BUTTON */
+.btn-like[b-g0c0o9jq7h] {
+    width: 100%;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #ff758c, #ff7eb3);
+    color: white;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+    .btn-like:hover[b-g0c0o9jq7h] {
+        opacity: 0.9;
+    }
+
+/* MATCH */
+.match-text[b-g0c0o9jq7h] {
+    margin-top: 10px;
+    color: #22c55e;
+    font-weight: 600;
+}
+.btn-like:not(:disabled):hover[b-g0c0o9jq7h] {
+    transform: translateY(-2px);
+    background-color: #ff6b81;
+}
+
+/* disabled state */
+.btn-like:disabled[b-g0c0o9jq7h] {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

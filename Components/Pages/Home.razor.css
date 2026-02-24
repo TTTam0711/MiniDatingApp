@@ -1,0 +1,71 @@
+﻿/* CONTAINER */
+.home-container {
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* HERO */
+.hero-section {
+    background: #f5eaea;
+    padding: 70px 20px;
+    border-radius: 16px;
+    margin-bottom: 60px;
+}
+
+    .hero-section h1 {
+        font-size: 40px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .hero-section p {
+        font-size: 18px;
+        color: #6b7280;
+    }
+
+/* CARD BASE */
+.action-card {
+    border-radius: 20px;
+    padding: 50px 20px;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+}
+
+    /* ICON */
+    .action-card i {
+        font-size: 40px;
+        margin-bottom: 15px;
+    }
+
+    /* TEXT */
+    .action-card h5 {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    /* HOVER */
+    .action-card:hover {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+/* COLORS (GRADIENT) */
+.card-blue {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: white;
+}
+
+.card-green {
+    background: linear-gradient(135deg, #34d399, #059669);
+    color: white;
+}
+
+.card-pink {
+    background: linear-gradient(135deg, #fb7185, #e11d48);
+    color: white;
+}

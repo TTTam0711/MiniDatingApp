@@ -1,0 +1,131 @@
+﻿@page "/availabilitypage/{UserId:guid}/{OtherUserId:guid}"
+@rendermode InteractiveServer
+@using MiniDatingApp.Models
+@using MiniDatingApp.Services
+
+@inject MatchService MatchService
+
+<h3>Set Your Availability</h3>
+
+<div class="mb-3">
+    <label>Start:</label>
+    <input type="datetime-local" class="form-control" @bind="startDateTime" />
+</div>
+
+<div class="mb-3">
+    <label>End:</label>
+    <input type="datetime-local" class="form-control" @bind="endDateTime" />
+</div>
+
+<button type="button" class="btn btn-primary" @onclick="HandleSubmit" disabled="@isLoading">
+    @(isLoading ? "Saving..." : "Save Availability")
+</button>
+
+@if (!string.IsNullOrEmpty(message))
+{
+    <div class="mt-3 alert @alertClass">
+        @message
+    </div>
+}
+
+@code {
+    [Parameter] public Guid UserId { get; set; }
+    [Parameter] public Guid OtherUserId { get; set; }
+
+    private DateTime startDateTime = DateTime.Now.AddHours(1);
+    private DateTime endDateTime = DateTime.Now.AddHours(2);
+
+    private string message = "";
+    private string alertClass = "alert-info";
+    private bool isLoading = false;
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            isLoading = true;
+            message = "";
+
+            var start = startDateTime;
+            var end = endDateTime;
+
+            // ✅ VALIDATION
+            var error = ValidateAvailability(start, end);
+            if (error != null)
+            {
+                alertClass = "alert-danger";
+                message = error;
+                isLoading = false;
+                return;
+            }
+
+            // ✅ SAVE
+            var availability = new Availability
+            {
+                UserId = UserId,
+                StartTime = start,
+                EndTime = end
+            };
+
+            await MatchService.AddAvailability(availability);
+
+            // ✅ CHECK OTHER USER
+            var hasOther = await MatchService.HasAvailability(OtherUserId);
+
+            if (!hasOther)
+            {
+                alertClass = "alert-warning";
+                message = "⏳ Waiting for the other user to set availability...";
+                isLoading = false;
+                return;
+            }
+
+            // ✅ FIND OVERLAP
+            var result = await MatchService.FindFirstCommonSlot(UserId, OtherUserId);
+
+            if (result != null)
+            {
+                alertClass = "alert-success";
+                message = $"✅ You have a date at: {result.Value.start:dd/MM/yyyy HH:mm} - {result.Value.end:dd/MM/yyyy HH:mm}";
+            }
+            else
+            {
+                alertClass = "alert-danger";
+                message = "❌ No common time found. Please try different slots.";
+            }
+
+            // ✅ RESET FORM (nice UX)
+            startDateTime = DateTime.Now.AddHours(1);
+            endDateTime = DateTime.Now.AddHours(2);
+        }
+        catch (Exception ex)
+        {
+            alertClass = "alert-danger";
+            message = "Error: " + ex.Message;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    private string? ValidateAvailability(DateTime start, DateTime end)
+    {
+        var now = DateTime.Now;
+        var max = now.AddDays(21);
+
+        if (end <= start)
+            return "End time must be after start time.";
+
+        if (start < now)
+            return "Start time cannot be in the past.";
+
+        if (end > max)
+            return "Availability must be within the next 3 weeks.";
+
+        if ((end - start).TotalMinutes < 15)
+            return "Time slot must be at least 15 minutes.";
+
+        return null;
+    }
+}

@@ -1,0 +1,323 @@
+/* _content/MiniDatingApp/Components/Layout/MainLayout.razor.rz.scp.css */
+.layout[b-e1s2urlup7] {
+    display: flex;
+}
+
+/* MAIN */
+.main-content[b-e1s2urlup7] {
+    flex: 1;
+    background: #f3f4f6;
+    min-height: 100vh;
+}
+
+/* TOPBAR */
+.topbar[b-e1s2urlup7] {
+    height: 60px;
+    background: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* CONTENT */
+.content[b-e1s2urlup7] {
+    padding: 30px;
+}
+/* _content/MiniDatingApp/Components/Layout/NavMenu.razor.rz.scp.css */
+/* SIDEBAR */
+.sidebar[b-30l4sbib1s] {
+    width: 240px;
+    height: 100vh;
+    background: linear-gradient(180deg, #f8fafc 0%, #eef2f7 100%);
+    border-right: 1px solid #e5e7eb;
+    padding: 20px 16px;
+}
+
+/* LOGO */
+.logo[b-30l4sbib1s] {
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+/* NAV ITEMS */
+.nav-item[b-30l4sbib1s] {
+    margin-bottom: 6px;
+}
+
+/* LINK */
+.nav-link[b-30l4sbib1s] {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #374151;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+    /* ICON */
+    .nav-link span[b-30l4sbib1s] {
+        font-size: 18px;
+    }
+
+    /* HOVER */
+    .nav-link:hover[b-30l4sbib1s] {
+        background-color: #e5edff;
+        color: #2563eb;
+    }
+
+    /* ACTIVE */
+    .nav-link.active[b-30l4sbib1s] {
+        background: linear-gradient(90deg, #dbeafe, #eff6ff);
+        color: #1d4ed8;
+        font-weight: 600;
+    }
+
+/* LOGOUT */
+.logout[b-30l4sbib1s] {
+    margin-top: 30px;
+    color: #ef4444;
+}
+
+    .logout:hover[b-30l4sbib1s] {
+        background-color: #fee2e2;
+    }
+
+
+[b-30l4sbib1s] .nav-link {
+    transition: all 0.2s ease;
+}
+
+    [b-30l4sbib1s] .nav-link:hover {
+        background-color: #e5edff;
+        color: #2563eb;
+    }
+
+    [b-30l4sbib1s] .nav-link.active {
+        background: linear-gradient(90deg, #dbeafe, #eff6ff);
+        color: #1d4ed8;
+    }
+/* _content/MiniDatingApp/Components/Pages/CreateProfile.razor.rz.scp.css */
+.create-container[b-v1esl3qckv] {
+    max-width: 700px;
+    margin: 40px auto;
+}
+
+/* HEADER */
+.create-header[b-v1esl3qckv] {
+    background: #f3e8e8;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+    .create-header h1[b-v1esl3qckv] {
+        font-weight: 700;
+    }
+
+    .create-header p[b-v1esl3qckv] {
+        color: #666;
+    }
+
+/* CARD */
+.form-card[b-v1esl3qckv] {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* FORM */
+.form-group[b-v1esl3qckv] {
+    margin-bottom: 18px;
+}
+
+    .form-group label[b-v1esl3qckv] {
+        font-weight: 600;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+/* INPUT */
+.form-control[b-v1esl3qckv] {
+    border-radius: 8px;
+    padding: 10px;
+}
+
+/* BUTTON */
+.create-btn[b-v1esl3qckv] {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #2f6fed, #3c82f6);
+    border: none;
+    color: white;
+}
+
+    .create-btn:hover[b-v1esl3qckv] {
+        opacity: 0.9;
+    }
+/* _content/MiniDatingApp/Components/Pages/Home.razor.rz.scp.css */
+/* CONTAINER */
+.home-container[b-8c07fpf6ma] {
+    max-width: 1100px;
+    margin: auto;
+}
+
+/* HERO */
+.hero-section[b-8c07fpf6ma] {
+    background: #f5eaea;
+    padding: 70px 20px;
+    border-radius: 16px;
+    margin-bottom: 60px;
+}
+
+    .hero-section h1[b-8c07fpf6ma] {
+        font-size: 40px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .hero-section p[b-8c07fpf6ma] {
+        font-size: 18px;
+        color: #6b7280;
+    }
+
+/* CARD BASE */
+.action-card[b-8c07fpf6ma] {
+    border-radius: 20px;
+    padding: 50px 20px;
+    min-height: 180px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+}
+
+    /* ICON */
+    .action-card i[b-8c07fpf6ma] {
+        font-size: 40px;
+        margin-bottom: 15px;
+    }
+
+    /* TEXT */
+    .action-card h5[b-8c07fpf6ma] {
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    /* HOVER */
+    .action-card:hover[b-8c07fpf6ma] {
+        transform: translateY(-6px) scale(1.02);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+/* COLORS (GRADIENT) */
+.card-blue[b-8c07fpf6ma] {
+    background: linear-gradient(135deg, #60a5fa, #3b82f6);
+    color: white;
+}
+
+.card-green[b-8c07fpf6ma] {
+    background: linear-gradient(135deg, #34d399, #059669);
+    color: white;
+}
+
+.card-pink[b-8c07fpf6ma] {
+    background: linear-gradient(135deg, #fb7185, #e11d48);
+    color: white;
+}
+/* _content/MiniDatingApp/Components/Pages/Profiles.razor.rz.scp.css */
+.profiles-container[b-g0c0o9jq7h] {
+    padding: 20px;
+}
+
+.profiles-header[b-g0c0o9jq7h] {
+    background: #f3e8e8;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+    .profiles-header h2[b-g0c0o9jq7h] {
+        font-weight: 700;
+    }
+
+/* CARD */
+.profile-card[b-g0c0o9jq7h] {
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+    transition: all 0.25s ease;
+}
+
+    .profile-card:hover[b-g0c0o9jq7h] {
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+
+    .profile-card img[b-g0c0o9jq7h] {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+/* INFO */
+.profile-info[b-g0c0o9jq7h] {
+    padding: 15px;
+}
+
+    .profile-info h5[b-g0c0o9jq7h] {
+        font-weight: 600;
+    }
+
+/* LIKE BUTTON */
+.btn-like[b-g0c0o9jq7h] {
+    width: 100%;
+    border: none;
+    padding: 10px;
+    border-radius: 10px;
+    background: linear-gradient(90deg, #ff758c, #ff7eb3);
+    color: white;
+    font-weight: 600;
+    margin-top: 10px;
+    transition: 0.2s;
+}
+
+    .btn-like:hover[b-g0c0o9jq7h] {
+        opacity: 0.9;
+    }
+
+/* MATCH */
+.match-text[b-g0c0o9jq7h] {
+    margin-top: 10px;
+    color: #22c55e;
+    font-weight: 600;
+}
+.btn-like:not(:disabled):hover[b-g0c0o9jq7h] {
+    transform: translateY(-2px);
+    background-color: #ff6b81;
+}
+
+/* disabled state */
+.btn-like:disabled[b-g0c0o9jq7h] {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}

@@ -1,0 +1,111 @@
+﻿@page "/matches"
+@rendermode InteractiveServer
+
+@using MiniDatingApp.Models
+@using MiniDatingApp.Services
+
+@inject MatchService MatchService
+@inject ProfileService ProfileService
+@inject NavigationManager Nav
+
+<h3>Your Matches</h3>
+
+@if (!profiles.Any())
+{
+    <p>Loading users...</p>
+}
+else
+{
+    <!-- 🔥 SELECT USER -->
+    <div class="mb-4">
+        <label>Select User:</label>
+
+        <select class="form-select w-auto"
+                value="@currentUserId"
+                @onchange="OnUserChange">
+
+            @foreach (var p in profiles)
+            {
+                <option value="@p.Id">@p.Name</option>
+            }
+        </select>
+    </div>
+
+    @if (isLoading)
+    {
+        <p>Loading matches...</p>
+    }
+    else if (!matches.Any())
+    {
+        <p>No matches yet.</p>
+    }
+    else
+    {
+        <ul class="list-group">
+            @foreach (var match in matches)
+            {
+                <li class="list-group-item">
+
+                    <b>@match.Name</b> (@match.Age) <br />
+                    <span class="text-muted">@match.Gender</span>
+
+                    <br />
+
+                    <button class="btn btn-sm btn-success mt-2"
+                            disabled="@isNavigating"
+                            @onclick="() => GoToAvailability(match.Id)">
+
+                        @(isNavigating ? "Opening..." : "Set Availability")
+                    </button>
+
+                </li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private List<Profile> profiles = new();
+    private List<Profile> matches = new();
+
+    private Guid currentUserId;
+
+    private bool isLoading = true;
+    private bool isNavigating = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        profiles = await ProfileService.GetAllAsync();
+
+        if (profiles.Any())
+        {
+            currentUserId = profiles.First().Id;
+            await LoadMatches();
+        }
+    }
+
+    private async Task OnUserChange(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var newUserId))
+        {
+            currentUserId = newUserId;
+            await LoadMatches();
+        }
+    }
+
+    private async Task LoadMatches()
+    {
+        isLoading = true;
+
+        matches = await MatchService.GetMatchesForUser(currentUserId);
+
+        isLoading = false;
+    }
+
+    private void GoToAvailability(Guid otherUserId)
+    {
+        isNavigating = true;
+
+        Nav.NavigateTo($"/availabilitypage/{currentUserId}/{otherUserId}");
+    }
+}

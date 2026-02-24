@@ -1,0 +1,106 @@
+﻿@page "/create-profile"
+@rendermode InteractiveServer
+@using MiniDatingApp.Models
+@using MiniDatingApp.Services
+@inject ProfileService ProfileService
+
+<div class="create-container">
+
+    <!-- HEADER -->
+    <div class="create-header text-center">
+        <h1>Create Profile</h1>
+        <p>Fill out the form below to create your dating profile.</p>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="form-card">
+
+        <EditForm EditContext="@editContext" OnValidSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <!-- NAME -->
+            <div class="form-group">
+                <label>Name</label>
+                <InputText @bind-Value="profile.Name" class="form-control" placeholder="Your name" />
+            </div>
+
+            <!-- AGE -->
+            <div class="form-group">
+                <label>Age</label>
+                <InputNumber @bind-Value="profile.Age" class="form-control" placeholder="Your age" />
+            </div>
+
+            <!-- GENDER (FIXED) -->
+            <div class="form-group">
+                <label>Gender</label>
+                <InputSelect @bind-Value="profile.Gender" class="form-control">
+                    <option value="">Select gender</option>
+                    <option>Male</option>
+                    <option>Female</option>
+                </InputSelect>
+            </div>
+
+            <!-- BIO (FIXED) -->
+            <div class="form-group">
+                <label>Bio</label>
+                <InputTextArea @bind-Value="profile.Bio" class="form-control" placeholder="A short description about yourself" />
+            </div>
+
+            <!-- EMAIL -->
+            <div class="form-group">
+                <label>Email</label>
+                <InputText @bind-Value="profile.Email" class="form-control" placeholder="Your email address" />
+            </div>
+
+            <!-- BUTTON (LOADING) -->
+            <button type="submit" class="btn create-btn" disabled="@isLoading">
+                @(isLoading ? "Creating..." : "Create Profile")
+            </button>
+        </EditForm>
+
+        @if (!string.IsNullOrEmpty(message))
+        {
+            <div class="alert mt-3 @(message.Contains("created") ? "alert-success" : "alert-danger")">
+                @message
+            </div>
+        }
+
+    </div>
+</div>
+
+@code {
+    private Profile profile = new();
+    private EditContext editContext;
+    private string message = string.Empty;
+    private bool isLoading = false;
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(profile);
+    }
+
+    private async Task HandleSubmit()
+    {
+        // Manual validation (important)
+        if (!editContext.Validate())
+            return;
+
+        isLoading = true;
+
+        var success = await ProfileService.CreateAsync(profile);
+
+        if (success)
+        {
+            message = "Profile created!";
+            profile = new Profile();
+            editContext = new EditContext(profile);
+        }
+        else
+        {
+            message = "Email already exists!";
+        }
+
+        isLoading = false;
+    }
+}

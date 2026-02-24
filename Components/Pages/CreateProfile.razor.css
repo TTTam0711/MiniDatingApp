@@ -1,0 +1,61 @@
+﻿.create-container {
+    max-width: 700px;
+    margin: 40px auto;
+}
+
+/* HEADER */
+.create-header {
+    background: #f3e8e8;
+    padding: 40px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+    .create-header h1 {
+        font-weight: 700;
+    }
+
+    .create-header p {
+        color: #666;
+    }
+
+/* CARD */
+.form-card {
+    background: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+
+/* FORM */
+.form-group {
+    margin-bottom: 18px;
+}
+
+    .form-group label {
+        font-weight: 600;
+        margin-bottom: 6px;
+        display: block;
+    }
+
+/* INPUT */
+.form-control {
+    border-radius: 8px;
+    padding: 10px;
+}
+
+/* BUTTON */
+.create-btn {
+    width: 100%;
+    margin-top: 15px;
+    padding: 12px;
+    font-weight: 600;
+    border-radius: 8px;
+    background: linear-gradient(90deg, #2f6fed, #3c82f6);
+    border: none;
+    color: white;
+}
+
+    .create-btn:hover {
+        opacity: 0.9;
+    }

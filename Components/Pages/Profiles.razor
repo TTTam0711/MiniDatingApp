@@ -1,0 +1,148 @@
+﻿@page "/profiles"
+@rendermode InteractiveServer
+
+@using MiniDatingApp.Models
+@using MiniDatingApp.Services
+
+@inject MatchService MatchService
+@inject ProfileService ProfileService
+
+<div class="profiles-container">
+
+    <!-- HEADER -->
+    <div class="profiles-header text-center">
+        <h2>Profiles List</h2>
+        <p>View all profiles and like someone you're interested in!</p>
+    </div>
+
+    @if (!profiles.Any())
+    {
+        <p class="text-center">No profiles found. Please create one first.</p>
+    }
+    else
+    {
+        <!-- SELECT USER -->
+        <div class="mb-4 text-center">
+            <label>Select Current User:</label>
+
+            <select class="form-select w-auto d-inline-block"
+                    value="@currentUserId"
+                    @onchange="OnUserChange">
+
+                @foreach (var p in profiles)
+                {
+                    <option value="@p.Id">@p.Name</option>
+                }
+
+            </select>
+
+            <p class="mt-2 text-muted">
+                Current User:
+                <strong>@profiles.FirstOrDefault(p => p.Id == currentUserId)?.Name</strong>
+            </p>
+        </div>
+
+        <!-- GRID -->
+        <div class="row g-4 justify-content-center">
+
+            @foreach (var p in profiles)
+            {
+                if (p.Id == currentUserId) continue;
+
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="profile-card">
+
+                        <img src="https://randomuser.me/api/portraits/men/1.jpg" />
+
+                        <div class="profile-info">
+                            <h5>@p.Name, @p.Age</h5>
+                            <p class="text-muted">@p.Gender</p>
+                            <p>@p.Bio</p>
+
+                            <!-- LIKE BUTTON -->
+                            <button class="btn-like"
+                                    disabled="@likedIds.Contains(p.Id)"
+                                    @onclick="() => Like(p.Id)">
+
+                                @(likedIds.Contains(p.Id) ? "✅ Liked" : "❤️ Like")
+                            </button>
+
+                            <!-- MATCH -->
+                            @if (matchedIds.Contains(p.Id))
+                            {
+                                <div class="match-text">
+                                    ❤️ It's a Match!
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                </div>
+            }
+
+        </div>
+    }
+
+</div>
+
+@code {
+    private List<Profile> profiles = new();
+    private Guid currentUserId;
+
+    private HashSet<Guid> likedIds = new();
+    private HashSet<Guid> matchedIds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        profiles = await ProfileService.GetAllAsync();
+
+        if (profiles.Any())
+        {
+            currentUserId = profiles.First().Id;
+            await LoadUserData();
+        }
+    }
+
+    private async Task OnUserChange(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var newUserId))
+        {
+            currentUserId = newUserId;
+            await LoadUserData();
+        }
+    }
+
+    private async Task LoadUserData()
+    {
+        likedIds = (await MatchService.GetLikedIds(currentUserId)).ToHashSet();
+        matchedIds = (await MatchService.GetMatchedIds(currentUserId)).ToHashSet();
+
+        StateHasChanged(); // 🔥 đảm bảo UI refresh
+    }
+
+    private async Task Like(Guid targetId)
+    {
+        if (targetId == currentUserId) return;
+        if (likedIds.Contains(targetId)) return;
+
+        try
+        {
+            await MatchService.LikeAsync(currentUserId, targetId);
+
+            likedIds.Add(targetId);
+
+            await MatchService.CreateMatchIfMutual(currentUserId, targetId);
+
+            if (await MatchService.IsMatch(currentUserId, targetId))
+            {
+                matchedIds.Add(targetId);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("LIKE ERROR: " + ex.Message);
+        }
+
+        StateHasChanged(); // 🔥 update UI ngay
+    }
+}
