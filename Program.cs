@@ -44,5 +44,5 @@ app.UseAntiforgery();
 app.MapStaticAssets();
 app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
-app.MapFallbackToPage("/_Host");
+
 app.Run();
