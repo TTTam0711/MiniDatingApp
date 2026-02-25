@@ -6,21 +6,17 @@
 
 @inject MatchService MatchService
 @inject ProfileService ProfileService
-@inject NavigationManager Nav
+@inject NavigationManager Navigation
 
-<h3>Your Matches</h3>
+<div class="container mt-4">
 
-@if (!profiles.Any())
-{
-    <p>Loading users...</p>
-}
-else
-{
-    <!-- 🔥 SELECT USER -->
-    <div class="mb-4">
-        <label>Select User:</label>
+    <h2 class="text-center mb-4">💖 Your Matches</h2>
 
-        <select class="form-select w-auto"
+    <!-- SELECT USER -->
+    <div class="text-center mb-4">
+        <label class="me-2 fw-semibold">Select User:</label>
+
+        <select class="form-select w-auto d-inline-block"
                 value="@currentUserId"
                 @onchange="OnUserChange">
 
@@ -28,51 +24,92 @@ else
             {
                 <option value="@p.Id">@p.Name</option>
             }
+
         </select>
     </div>
 
-    @if (isLoading)
+    @if (!matchedProfiles.Any())
     {
-        <p>Loading matches...</p>
-    }
-    else if (!matches.Any())
-    {
-        <p>No matches yet.</p>
+        <div class="text-center text-muted">
+            😢 No matches yet. Go like someone first!
+        </div>
     }
     else
     {
-        <ul class="list-group">
-            @foreach (var match in matches)
+        <div class="row g-4">
+
+            @foreach (var p in matchedProfiles)
             {
-                <li class="list-group-item">
+                var slot = matchSlots.ContainsKey(p.Id) ? matchSlots[p.Id] : null;
+                var bothHaveAvailability = bothAvailability.Contains(p.Id);
 
-                    <b>@match.Name</b> (@match.Age) <br />
-                    <span class="text-muted">@match.Gender</span>
+                <div class="col-md-6 col-lg-4">
+                    <div class="card shadow-sm p-3 h-100 border-0 rounded-4">
 
-                    <br />
+                        <!-- PROFILE -->
+                        <div class="mb-2">
+                            <h5 class="fw-bold">@p.Name (@p.Age)</h5>
+                            <p class="text-muted mb-1">@p.Gender</p>
+                        </div>
 
-                    <button class="btn btn-sm btn-success mt-2"
-                            disabled="@isNavigating"
-                            @onclick="() => GoToAvailability(match.Id)">
+                        <!-- STATUS -->
+                        <div class="mb-3">
 
-                        @(isNavigating ? "Opening..." : "Set Availability")
-                    </button>
+                            @if (slot != null)
+                            {
+                                <div class="alert alert-success">
+                                    <div class="fw-semibold">📅 Date Confirmed</div>
+                                    <div>
+                                        <strong>
+                                            @slot.Value.start.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                            -
+                                            @slot.Value.end.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                        </strong>
+                                    </div>
+                                </div>
+                            }
+                            else if (bothHaveAvailability)
+                            {
+                                <div class="alert alert-danger">
+                                    ❌ No common time found
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="alert alert-warning">
+                                    ⏳ Waiting for availability
+                                </div>
+                            }
 
-                </li>
+                        </div>
+
+                        <!-- BUTTON -->
+                        <button class="btn btn-primary mt-auto w-100"
+                                @onclick="() => GoToAvailability(p.Id)">
+                            📅 Add Availability
+                        </button>
+
+                    </div>
+                </div>
             }
-        </ul>
+
+        </div>
     }
-}
+
+</div>
 
 @code {
     private List<Profile> profiles = new();
-    private List<Profile> matches = new();
+    private List<Profile> matchedProfiles = new();
 
     private Guid currentUserId;
 
-    private bool isLoading = true;
-    private bool isNavigating = false;
+    private Dictionary<Guid, (DateTime start, DateTime end)?> matchSlots = new();
+    private HashSet<Guid> bothAvailability = new();
 
+    // =========================
+    // 🔹 INIT
+    // =========================
     protected override async Task OnInitializedAsync()
     {
         profiles = await ProfileService.GetAllAsync();
@@ -80,32 +117,62 @@ else
         if (profiles.Any())
         {
             currentUserId = profiles.First().Id;
-            await LoadMatches();
+            await LoadData();
         }
     }
 
+    // =========================
+    // 🔹 CHANGE USER
+    // =========================
     private async Task OnUserChange(ChangeEventArgs e)
     {
         if (Guid.TryParse(e.Value?.ToString(), out var newUserId))
         {
             currentUserId = newUserId;
-            await LoadMatches();
+            await LoadData();
         }
     }
 
-    private async Task LoadMatches()
+    // =========================
+    // 🔹 LOAD DATA
+    // =========================
+    private async Task LoadData()
     {
-        isLoading = true;
+        matchedProfiles = await MatchService.GetMatchesForUser(currentUserId);
 
-        matches = await MatchService.GetMatchesForUser(currentUserId);
+        matchSlots.Clear();
+        bothAvailability.Clear();
 
-        isLoading = false;
+        foreach (var p in matchedProfiles)
+        {
+            // 🔥 LẤY MATCH
+            var match = await MatchService.GetMatch(currentUserId, p.Id);
+            if (match == null) continue;
+
+            // 🔹 SLOT THEO MATCH
+            var slot = await MatchService.GetMatchSlot(match.Id);
+            matchSlots[p.Id] = slot;
+
+            // 🔹 CHECK AVAILABILITY THEO MATCH
+            var (hasA, hasB) = await MatchService.CheckBothAvailability(match.Id);
+
+            if (hasA && hasB)
+            {
+                bothAvailability.Add(p.Id);
+            }
+        }
     }
 
-    private void GoToAvailability(Guid otherUserId)
+    // =========================
+    // 🔹 NAVIGATION
+    // =========================
+    private async Task GoToAvailability(Guid otherUserId)
     {
-        isNavigating = true;
+        var match = await MatchService.GetMatch(currentUserId, otherUserId);
 
-        Nav.NavigateTo($"/availabilitypage/{currentUserId}/{otherUserId}");
+        if (match != null)
+        {
+            Navigation.NavigateTo($"/availabilitypage/{match.Id}/{currentUserId}/{otherUserId}");
+        }
     }
 }

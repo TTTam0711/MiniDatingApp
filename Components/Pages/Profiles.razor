@@ -38,42 +38,53 @@
 
             <p class="mt-2 text-muted">
                 Current User:
-                <strong>@profiles.FirstOrDefault(p => p.Id == currentUserId)?.Name</strong>
+                <strong>@currentUser?.Name</strong>
             </p>
         </div>
 
         <!-- GRID -->
-        <div class="row g-4 justify-content-center">
+        <div class="row g-4">
 
             @foreach (var p in profiles)
             {
                 if (p.Id == currentUserId) continue;
 
+                var isLiked = likedIds.Contains(p.Id);
+                var isMatched = matchedIds.Contains(p.Id);
+
                 <div class="col-lg-3 col-md-4 col-sm-6">
-                    <div class="profile-card">
+                    <div class="profile-card @(isMatched ? "match" : "")">
 
-                        <img src="https://randomuser.me/api/portraits/men/1.jpg" />
+                        <!-- IMAGE -->
+                        <div class="profile-image">
+                            <img src="@GetAvatar(p)" />
 
+                            <div class="profile-overlay">
+                                <h5>@p.Name, @p.Age</h5>
+                                <span>@p.Gender</span>
+                            </div>
+                        </div>
+
+                        <!-- INFO -->
                         <div class="profile-info">
-                            <h5>@p.Name, @p.Age</h5>
-                            <p class="text-muted">@p.Gender</p>
-                            <p>@p.Bio</p>
 
-                            <!-- LIKE BUTTON -->
-                            <button class="btn-like"
-                                    disabled="@likedIds.Contains(p.Id)"
-                                    @onclick="() => Like(p.Id)">
+                            <div>
+                                <p class="bio">@p.Bio</p>
+                            </div>
 
-                                @(likedIds.Contains(p.Id) ? "✅ Liked" : "❤️ Like")
-                            </button>
+                            <div>
+                                <button class="btn-like"
+                                        disabled="@isLiked"
+                                        @onclick="() => Like(p.Id)">
+                                    @(isLiked ? "✅ Liked" : "❤️ Like")
+                                </button>
 
-                            <!-- MATCH -->
-                            @if (matchedIds.Contains(p.Id))
-                            {
-                                <div class="match-text">
-                                    ❤️ It's a Match!
-                                </div>
-                            }
+                                @if (isMatched)
+                                {
+                                    <div class="match-text">❤️ It's a Match!</div>
+                                }
+                            </div>
+
                         </div>
 
                     </div>
@@ -88,6 +99,7 @@
 @code {
     private List<Profile> profiles = new();
     private Guid currentUserId;
+    private Profile? currentUser;
 
     private HashSet<Guid> likedIds = new();
     private HashSet<Guid> matchedIds = new();
@@ -114,10 +126,10 @@
 
     private async Task LoadUserData()
     {
+        currentUser = profiles.FirstOrDefault(p => p.Id == currentUserId);
+
         likedIds = (await MatchService.GetLikedIds(currentUserId)).ToHashSet();
         matchedIds = (await MatchService.GetMatchedIds(currentUserId)).ToHashSet();
-
-        StateHasChanged(); // 🔥 đảm bảo UI refresh
     }
 
     private async Task Like(Guid targetId)
@@ -142,7 +154,14 @@
         {
             Console.WriteLine("LIKE ERROR: " + ex.Message);
         }
+    }
 
-        StateHasChanged(); // 🔥 update UI ngay
+    private string GetAvatar(Profile p)
+    {
+        var gender = p.Gender?.Trim().ToLower();
+
+        return gender == "female"
+            ? "images/female.png"
+            : "images/male.png";
     }
 }

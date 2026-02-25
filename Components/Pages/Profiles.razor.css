@@ -1,79 +1,200 @@
-﻿.profiles-container {
+﻿/* =========================
+   GLOBAL
+========================= */
+body {
+    background: linear-gradient(to bottom, #fff5f7, #f9fafb);
+    font-family: 'Segoe UI', sans-serif;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+.profiles-container {
     padding: 20px;
 }
 
+/* =========================
+   HEADER
+========================= */
 .profiles-header {
     background: #f3e8e8;
-    padding: 40px;
-    border-radius: 12px;
+    padding: 35px;
+    border-radius: 14px;
     margin-bottom: 30px;
+    text-align: center;
 }
 
     .profiles-header h2 {
         font-weight: 700;
+        margin-bottom: 8px;
     }
 
-/* CARD */
-.profile-card {
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-    transition: all 0.25s ease;
+    .profiles-header p {
+        color: #666;
+        margin: 0;
+    }
+
+/* =========================
+   GRID (Bootstrap override nhẹ)
+========================= */
+.row.g-4 {
+    margin-top: 10px;
 }
 
+/* =========================
+   PROFILE CARD
+========================= */
+.profile-card {
+    background: #ffffff;
+    border-radius: 18px;
+    overflow: hidden;
+    border: 1px solid #ffe4e6;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: all 0.25s ease;
+    box-shadow: 0 6px 20px rgba(255, 105, 135, 0.08);
+}
+
+    /* Hover nhẹ – đừng quá lố */
     .profile-card:hover {
-        transform: translateY(-8px);
-        box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        transform: translateY(-4px);
+        box-shadow: 0 12px 28px rgba(255, 105, 135, 0.15);
     }
 
-    .profile-card img {
+    /* =========================
+   MATCH STATE (NO :has)
+========================= */
+    .profile-card.match {
+        border: 1.5px solid #ff4d6d;
+        box-shadow: 0 8px 20px rgba(255, 77, 109, 0.18);
+    }
+
+/* =========================
+   IMAGE
+========================= */
+.profile-image {
+    position: relative;
+    height: 220px;
+    overflow: hidden;
+    background: #f3f3f3;
+}
+
+    .profile-image img {
         width: 100%;
-        height: 180px;
-        object-fit: cover;
+        height: 100%;
+        object-fit: contain; /* ✅ đúng với avatar */
+        background: #f3f3f3;
     }
 
-/* INFO */
+/* zoom nhẹ khi hover */
+.profile-card:hover .profile-image img {
+    transform: scale(1.05);
+}
+
+/* =========================
+   OVERLAY (optional)
+========================= */
+.profile-overlay {
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    padding: 10px;
+    background: linear-gradient( to top, rgba(255, 105, 135, 0.6), rgba(0, 0, 0, 0) );
+    color: white;
+}
+
+    .profile-overlay h5 {
+        margin: 0;
+        font-weight: 700;
+        font-size: 18px;
+        color: #111; /* 👈 đen rõ */
+    }
+
+    .profile-overlay span {
+        font-size: 13px;
+        font-weight: 500;
+        color: #333; /* 👈 xám đậm */
+    }
+    .profile-overlay h5 span.name {
+        color: #fff;
+    }
+
+    .profile-overlay h5 span.age {
+        color: #ffd1dc;
+    }
+/* =========================
+   INFO
+========================= */
 .profile-info {
-    padding: 15px;
+    padding: 18px;
+    text-align: center;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
 }
 
     .profile-info h5 {
+        margin-bottom: 6px;
         font-weight: 600;
     }
 
-/* LIKE BUTTON */
+    .profile-info .bio {
+        color: #666;
+        font-style: italic;
+        font-size: 14px;
+        margin-bottom: 12px;
+    }
+
+/* =========================
+   BUTTON
+========================= */
 .btn-like {
     width: 100%;
-    border: none;
-    padding: 10px;
     border-radius: 10px;
-    background: linear-gradient(90deg, #ff758c, #ff7eb3);
+    padding: 8px;
+    background: linear-gradient(90deg, #ff4d6d, #ff8fa3);
+    border: none;
     color: white;
-    font-weight: 600;
-    margin-top: 10px;
-    transition: 0.2s;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    box-shadow: 0 5px 12px rgba(255, 77, 109, 0.35);
 }
 
     .btn-like:hover {
-        opacity: 0.9;
+        transform: translateY(-1px);
+        opacity: 0.95;
     }
 
-/* MATCH */
+    .btn-like:disabled {
+        background: #e5e5e5;
+        color: #888;
+        box-shadow: none;
+        cursor: not-allowed;
+    }
+
+/* =========================
+   MATCH TEXT
+========================= */
 .match-text {
     margin-top: 10px;
-    color: #22c55e;
+    color: #ff4d6d;
     font-weight: 600;
-}
-.btn-like:not(:disabled):hover {
-    transform: translateY(-2px);
-    background-color: #ff6b81;
+    font-size: 13px;
+    letter-spacing: 0.3px;
 }
 
-/* disabled state */
-.btn-like:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-    transform: none;
-    box-shadow: none;
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.04);
+    }
+
+    100% {
+        transform: scale(1);
+    }
 }

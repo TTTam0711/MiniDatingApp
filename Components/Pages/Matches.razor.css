@@ -1,0 +1,64 @@
+﻿/* 🔹 Page title */
+h2 {
+    font-weight: 700;
+}
+
+/* 🔹 Select dropdown */
+select.form-select {
+    border-radius: 8px;
+}
+
+/* 🔹 Card profile */
+.card {
+    transition: 0.2s ease;
+}
+
+    .card:hover {
+        transform: translateY(-4px);
+    }
+
+    /* 🔹 Profile name */
+    .card h5 {
+        font-size: 1.2rem;
+    }
+
+/* 🔹 Status alert */
+.alert {
+    border-radius: 12px;
+    padding: 10px 12px;
+}
+
+/* 🔹 Success (date found) */
+.alert-success {
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border: none;
+}
+
+/* 🔹 Warning (waiting) */
+.alert-warning {
+    background: linear-gradient(135deg, #fff8e1, #fff3e0);
+    border: none;
+}
+
+/* 🔹 Danger (no match) */
+.alert-danger {
+    background: linear-gradient(135deg, #ffebee, #fce4ec);
+    border: none;
+}
+
+/* 🔹 Button */
+button.btn-primary {
+    border-radius: 10px;
+    font-weight: 500;
+}
+
+    /* 🔹 Button hover */
+    button.btn-primary:hover {
+        transform: scale(1.02);
+        transition: 0.15s ease;
+    }
+
+/* 🔹 Empty state */
+.text-muted {
+    font-size: 1rem;
+}

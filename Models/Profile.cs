@@ -14,6 +14,7 @@ namespace MiniDatingApp.Models
         public int Age { get; set; }
 
         [Required]
+        [RegularExpression("Male|Female", ErrorMessage = "Gender must be Male or Female")]
         public string Gender { get; set; } = string.Empty;
 
         [StringLength(500)]

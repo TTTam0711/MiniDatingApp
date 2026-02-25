@@ -43,7 +43,7 @@ namespace MiniDatingApp.Services
         public async Task<List<Guid>> GetLikedIds(Guid userId)
         {
             return await _context.Likes
-                .Where(l => l.FromUserId == userId) // 🔥 QUAN TRỌNG
+                .Where(l => l.FromUserId == userId)
                 .Select(l => l.ToUserId)
                 .ToListAsync();
         }
@@ -55,14 +55,12 @@ namespace MiniDatingApp.Services
         {
             if (userA == userB) return;
 
-            // Check mutual like
             bool isMatch =
                 await _context.Likes.AnyAsync(x => x.FromUserId == userA && x.ToUserId == userB)
                 && await _context.Likes.AnyAsync(x => x.FromUserId == userB && x.ToUserId == userA);
 
             if (!isMatch) return;
 
-            // Check existing match
             bool exists = await _context.Matches.AnyAsync(m =>
                 (m.User1Id == userA && m.User2Id == userB) ||
                 (m.User1Id == userB && m.User2Id == userA));
@@ -103,45 +101,68 @@ namespace MiniDatingApp.Services
         }
 
         // ========================
-        // 🔹 AVAILABILITY (TEMP - WILL MOVE LATER)
+        // 🔹 GET MATCH ENTITY
         // ========================
-
-        public async Task AddAvailability(Availability availability)
+        public async Task<Match?> GetMatch(Guid userA, Guid userB)
         {
-            // Basic validation
-            if (availability.StartTime >= availability.EndTime)
-                return;
+            return await _context.Matches.FirstOrDefaultAsync(m =>
+                (m.User1Id == userA && m.User2Id == userB) ||
+                (m.User1Id == userB && m.User2Id == userA));
+        }
+
+        // ========================
+        // 🔹 ADD AVAILABILITY (MULTI SLOT)
+        // ========================
+        public async Task AddAvailability(int matchId, Availability availability)
+        {
+            // ❌ KHÔNG XOÁ nữa
+            // 👉 cho phép nhiều slot
+
+            availability.MatchId = matchId;
 
             _context.Availabilities.Add(availability);
+
             await _context.SaveChangesAsync();
         }
 
-        public async Task<(DateTime start, DateTime end)?> FindFirstCommonSlot(Guid userA, Guid userB)
+        // ========================
+        // 🔹 FIND FIRST COMMON SLOT
+        // ========================
+        public async Task<(DateTime start, DateTime end)?> GetMatchSlot(int matchId)
         {
-            var listA = await _context.Availabilities
-                .Where(a => a.UserId == userA)
-                .OrderBy(a => a.StartTime)
+            var match = await _context.Matches.FindAsync(matchId);
+            if (match == null) return null;
+
+            var userA = match.User1Id;
+            var userB = match.User2Id;
+
+            var now = DateTime.UtcNow;
+            var max = now.AddDays(21);
+
+            // 🔥 SORT theo thời gian
+            var aSlots = await _context.Availabilities
+                .Where(x => x.MatchId == matchId && x.UserId == userA && x.EndTime > now && x.EndTime <= max)
+                .OrderBy(x => x.StartTime)
                 .ToListAsync();
 
-            var listB = await _context.Availabilities
-                .Where(a => a.UserId == userB)
-                .OrderBy(a => a.StartTime)
+            var bSlots = await _context.Availabilities
+                .Where(x => x.MatchId == matchId && x.UserId == userB && x.EndTime > now && x.EndTime <= max)
+                .OrderBy(x => x.StartTime)
                 .ToListAsync();
 
-            foreach (var a in listA)
+            if (!aSlots.Any() || !bSlots.Any())
+                return null;
+
+            foreach (var a in aSlots)
             {
-                foreach (var b in listB)
+                foreach (var b in bSlots)
                 {
-                    if (a.StartTime == null || a.EndTime == null ||
-                        b.StartTime == null || b.EndTime == null)
-                        continue;
-
                     var start = a.StartTime > b.StartTime ? a.StartTime : b.StartTime;
                     var end = a.EndTime < b.EndTime ? a.EndTime : b.EndTime;
 
-                    if (start < end)
+                    if (end > start)
                     {
-                        return (start.Value, end.Value);
+                        return (start.Value, end.Value); // 🔥 FIRST MATCH
                     }
                 }
             }
@@ -149,10 +170,27 @@ namespace MiniDatingApp.Services
             return null;
         }
 
-        public async Task<bool> HasAvailability(Guid userId)
+        // ========================
+        // 🔹 CHECK AVAILABILITY
+        // ========================
+        public async Task<bool> HasAvailability(int matchId, Guid userId)
         {
             return await _context.Availabilities
-                .AnyAsync(a => a.UserId == userId);
+                .AnyAsync(a => a.MatchId == matchId && a.UserId == userId);
+        }
+
+        public async Task<(bool hasA, bool hasB)> CheckBothAvailability(int matchId)
+        {
+            var match = await _context.Matches.FindAsync(matchId);
+            if (match == null) return (false, false);
+
+            var hasA = await _context.Availabilities
+                .AnyAsync(a => a.MatchId == matchId && a.UserId == match.User1Id);
+
+            var hasB = await _context.Availabilities
+                .AnyAsync(a => a.MatchId == matchId && a.UserId == match.User2Id);
+
+            return (hasA, hasB);
         }
     }
 }

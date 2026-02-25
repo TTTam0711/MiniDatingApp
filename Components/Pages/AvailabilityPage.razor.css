@@ -1,0 +1,36 @@
+﻿/* 🔹 User card (Linh ❤️ Vy) */
+.user-card {
+    border-radius: 12px;
+    background: linear-gradient(135deg, #e3f2fd, #fce4ec);
+    transition: 0.2s ease;
+}
+
+    .user-card:hover {
+        transform: translateY(-2px);
+    }
+
+/* 🔹 Name styling */
+.user-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+/* 🔹 Heart icon */
+.heart {
+    font-size: 1.5rem;
+}
+
+/* 🔹 Form card */
+.form-card {
+    border-radius: 12px;
+}
+
+/* 🔹 Button group */
+.action-buttons button {
+    min-width: 140px;
+}
+
+/* 🔹 Alert polish */
+.alert {
+    border-radius: 10px;
+}

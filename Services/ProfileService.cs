@@ -40,5 +40,10 @@ namespace MiniDatingApp.Services
 
             return true;
         }
+        public async Task<Profile?> GetById(Guid id)
+        {
+            return await _context.Profiles
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
     }
 }

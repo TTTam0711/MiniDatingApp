@@ -5,7 +5,7 @@ namespace MiniDatingApp.Models
     public class Availability
     {
         public int Id { get; set; }
-
+        public int MatchId { get; set; }
         [Required]
         public Guid UserId { get; set; }
 

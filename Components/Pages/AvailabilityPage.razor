@@ -1,26 +1,78 @@
-﻿@page "/availabilitypage/{UserId:guid}/{OtherUserId:guid}"
+﻿@page "/availabilitypage/{MatchId:int}/{UserId:guid}/{OtherUserId:guid}"
 @rendermode InteractiveServer
+
 @using MiniDatingApp.Models
 @using MiniDatingApp.Services
 
 @inject MatchService MatchService
+@inject ProfileService ProfileService
+@inject NavigationManager Nav
 
-<h3>Set Your Availability</h3>
+<h3 class="mb-3">Set Your Availability</h3>
 
-<div class="mb-3">
-    <label>Start:</label>
-    <input type="datetime-local" class="form-control" @bind="startDateTime" />
+<!-- 🔹 USER CONTEXT -->
+@if (currentUser != null && otherUser != null)
+{
+    <div class="card shadow-sm mb-3 user-card">
+        <div class="card-body d-flex justify-content-between align-items-center">
+
+            <div class="text-center">
+                <div class="user-name">👤 @currentUser.Name</div>
+                <small class="text-muted">You</small>
+            </div>
+
+            <div class="heart">❤️</div>
+
+            <div class="text-center">
+                <div class="user-name">@otherUser.Name</div>
+                <small class="text-muted">Match</small>
+            </div>
+
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">
+        Loading users...
+    </div>
+}
+
+<!-- 🔹 FORM -->
+<div class="card shadow-sm form-card">
+    <div class="card-body">
+
+        <div class="mb-3">
+            <label class="form-label">Start</label>
+            <input type="datetime-local"
+                   class="form-control"
+                   value="@startDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                   @onchange="OnStartChanged" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">End</label>
+            <input type="datetime-local"
+                   class="form-control"
+                   value="@endDateTime.ToString("yyyy-MM-ddTHH:mm")"
+                   @onchange="OnEndChanged" />
+        </div>
+
+        <!-- 🔹 BUTTON GROUP -->
+        <div class="mt-3 d-flex gap-2 action-buttons">
+            <button type="button" class="btn btn-secondary" @onclick="GoBack">
+                ← Back
+            </button>
+
+            <button type="button" class="btn btn-primary" @onclick="HandleSubmit" disabled="@isLoading">
+                @(isLoading ? "Saving..." : "Save Availability")
+            </button>
+        </div>
+
+    </div>
 </div>
 
-<div class="mb-3">
-    <label>End:</label>
-    <input type="datetime-local" class="form-control" @bind="endDateTime" />
-</div>
-
-<button type="button" class="btn btn-primary" @onclick="HandleSubmit" disabled="@isLoading">
-    @(isLoading ? "Saving..." : "Save Availability")
-</button>
-
+<!-- 🔹 MESSAGE -->
 @if (!string.IsNullOrEmpty(message))
 {
     <div class="mt-3 alert @alertClass">
@@ -29,37 +81,43 @@
 }
 
 @code {
+    [Parameter] public int MatchId { get; set; } // 🔥 NEW
     [Parameter] public Guid UserId { get; set; }
     [Parameter] public Guid OtherUserId { get; set; }
 
-    private DateTime startDateTime = DateTime.Now.AddHours(1);
-    private DateTime endDateTime = DateTime.Now.AddHours(2);
+    private DateTime startDateTime;
+    private DateTime endDateTime;
 
     private string message = "";
     private string alertClass = "alert-info";
     private bool isLoading = false;
 
+    private Profile? currentUser;
+    private Profile? otherUser;
+
+    // =========================
+    // 🔹 HANDLE SUBMIT
+    // =========================
     private async Task HandleSubmit()
     {
+        if (isLoading) return;
+
         try
         {
             isLoading = true;
             message = "";
 
-            var start = startDateTime;
-            var end = endDateTime;
+            var start = DateTime.SpecifyKind(startDateTime, DateTimeKind.Local).ToUniversalTime();
+            var end = DateTime.SpecifyKind(endDateTime, DateTimeKind.Local).ToUniversalTime();
 
-            // ✅ VALIDATION
             var error = ValidateAvailability(start, end);
             if (error != null)
             {
                 alertClass = "alert-danger";
                 message = error;
-                isLoading = false;
                 return;
             }
 
-            // ✅ SAVE
             var availability = new Availability
             {
                 UserId = UserId,
@@ -67,36 +125,26 @@
                 EndTime = end
             };
 
-            await MatchService.AddAvailability(availability);
+            // 🔥 SAVE THEO MATCH
+            await MatchService.AddAvailability(MatchId, availability);
 
-            // ✅ CHECK OTHER USER
-            var hasOther = await MatchService.HasAvailability(OtherUserId);
-
-            if (!hasOther)
-            {
-                alertClass = "alert-warning";
-                message = "⏳ Waiting for the other user to set availability...";
-                isLoading = false;
-                return;
-            }
-
-            // ✅ FIND OVERLAP
-            var result = await MatchService.FindFirstCommonSlot(UserId, OtherUserId);
+            // 🔥 CHECK SLOT THEO MATCH
+            var result = await MatchService.GetMatchSlot(MatchId);
 
             if (result != null)
             {
                 alertClass = "alert-success";
-                message = $"✅ You have a date at: {result.Value.start:dd/MM/yyyy HH:mm} - {result.Value.end:dd/MM/yyyy HH:mm}";
+
+                var startLocal = result.Value.start.ToLocalTime();
+                var endLocal = result.Value.end.ToLocalTime();
+
+                message = $"✅ You have a date scheduled at: {startLocal:dd/MM/yyyy HH:mm} - {endLocal:dd/MM/yyyy HH:mm}";
             }
             else
             {
-                alertClass = "alert-danger";
-                message = "❌ No common time found. Please try different slots.";
+                alertClass = "alert-warning";
+                message = "Waiting for the other user or no common time yet.";
             }
-
-            // ✅ RESET FORM (nice UX)
-            startDateTime = DateTime.Now.AddHours(1);
-            endDateTime = DateTime.Now.AddHours(2);
         }
         catch (Exception ex)
         {
@@ -109,9 +157,12 @@
         }
     }
 
+    // =========================
+    // 🔹 VALIDATION
+    // =========================
     private string? ValidateAvailability(DateTime start, DateTime end)
     {
-        var now = DateTime.Now;
+        var now = DateTime.UtcNow;
         var max = now.AddDays(21);
 
         if (end <= start)
@@ -127,5 +178,91 @@
             return "Time slot must be at least 15 minutes.";
 
         return null;
+    }
+
+    // =========================
+    // 🔹 LOAD MATCH STATE
+    // =========================
+    private async Task CheckForExistingMatch()
+    {
+        var (hasA, hasB) = await MatchService.CheckBothAvailability(MatchId);
+
+        if (!hasA || !hasB)
+        {
+            alertClass = "alert-warning";
+            message = "Waiting for both users to select availability.";
+            return;
+        }
+
+        var result = await MatchService.GetMatchSlot(MatchId);
+
+        if (result != null)
+        {
+            alertClass = "alert-success";
+
+            var startLocal = result.Value.start.ToLocalTime();
+            var endLocal = result.Value.end.ToLocalTime();
+
+            message = $"✅ You have a date scheduled at: {startLocal:dd/MM/yyyy HH:mm} - {endLocal:dd/MM/yyyy HH:mm}";
+        }
+        else
+        {
+            alertClass = "alert-danger";
+            message = "No common time found. Please select a different time.";
+        }
+    }
+
+    // =========================
+    // 🔹 LIFECYCLE
+    // =========================
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            currentUser = await ProfileService.GetById(UserId);
+            otherUser = await ProfileService.GetById(OtherUserId);
+
+            if (startDateTime == default)
+            {
+                startDateTime = DateTime.Now.AddHours(1);
+                endDateTime = DateTime.Now.AddHours(2);
+            }
+
+            if (string.IsNullOrEmpty(message))
+            {
+                await CheckForExistingMatch();
+            }
+
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+
+    // =========================
+    // 🔹 INPUT HANDLERS
+    // =========================
+    private void OnStartChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), null,
+            System.Globalization.DateTimeStyles.AssumeLocal, out var dt))
+        {
+            startDateTime = dt;
+        }
+    }
+
+    private void OnEndChanged(ChangeEventArgs e)
+    {
+        if (DateTime.TryParse(e.Value?.ToString(), null,
+            System.Globalization.DateTimeStyles.AssumeLocal, out var dt))
+        {
+            endDateTime = dt;
+        }
+    }
+
+    // =========================
+    // 🔹 BACK BUTTON
+    // =========================
+    private void GoBack()
+    {
+        Nav.NavigateTo("/matches", true);
     }
 }
