@@ -1,0 +1,15 @@
+# Build
+bin/
+obj/
+
+# Visual Studio
+.vs/
+
+# Database
+*.db
+*.db-shm
+*.db-wal
+
+# OS
+.DS_Store
+Thumbs.db
